@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
+/* Design token theo bộ mockup AquaHub (xem docs/RA_SOAT_50_ANH.md mục 2) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f2f8fd;
+  --surface: #ffffff;
+  --surface-2: #f6fafe;
+  --line: #dfe9f3;
+  --ink: #0f2a5f;
+  --ink-2: #4a5f80;
+  --ink-3: #7d8fa9;
+  --brand: #0b84f3;
+  --brand-2: #0ea5e9;
+  --brand-ink: #ffffff;
+  --brand-soft: #e3f2ff;
+  --ok: #16a34a;
+  --ok-soft: #e7f8ee;
+  --warn: #d97706;
+  --warn-soft: #fff6e0;
+  --bad: #dc2626;
+  --bad-soft: #feecec;
+  --violet: #7c3aed;
+  --violet-soft: #f1ebff;
+  --radius: 14px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-soft: var(--brand-soft);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 16px;
 }
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Nền sóng nước dùng cho trang khách */
+.waves {
+  background:
+    radial-gradient(120% 60% at 50% 115%, #bfe3ff 0 40%, transparent 41%),
+    radial-gradient(90% 50% at 20% 120%, #d8eeff 0 45%, transparent 46%),
+    linear-gradient(180deg, #f5fbff 0%, #eaf5ff 100%);
+}
+
+/* Hiệu ứng chuyển động trên màn kết quả (BR-14) chống chụp màn hình */
+@keyframes sweep {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(320%) skewX(-20deg); }
+}
+.sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: sweep 2.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+  100% { box-shadow: 0 0 0 22px rgba(255, 255, 255, 0); }
+}
+.pulse-ring {
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
 }
