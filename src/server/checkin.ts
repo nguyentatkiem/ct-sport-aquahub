@@ -1,5 +1,5 @@
 // Dịch vụ check-in: đọc dữ liệu, gọi lõi luật, ghi kết quả trong 1 giao dịch có khoá dòng (NFR-03).
-import { and, desc, eq, gt, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { db, type Exec, type Tx } from "@/db";
 import { checkIn, coSo, donHang, ghiDanh, giaoVien, khachHang, lopHoc, theVe } from "@/db/schema";
 import { quyetDinhCheckIn, datDieuKienThanhToan, LY_DO_TEXT, type TheInput, type LyDo } from "@/lib/checkin-engine";
@@ -186,7 +186,7 @@ export async function thucHienCheckIn(opts: {
     const [gan] = await tx
       .select({ id: checkIn.id })
       .from(checkIn)
-      .where(and(eq(checkIn.khachHangId, k.id), eq(checkIn.coSoId, cs.id), gt(checkIn.thoiGian, new Date(now.getTime() - 5 * 60000)), inArray(checkIn.ketQua, ["HOP_LE", "CANH_BAO", "BI_CHAN"])))
+      .where(and(eq(checkIn.khachHangId, k.id), eq(checkIn.coSoId, cs.id), gt(checkIn.thoiGian, new Date(now.getTime() - 5 * 60000)), lte(checkIn.thoiGian, new Date(now.getTime() + 60000)), inArray(checkIn.ketQua, ["HOP_LE", "CANH_BAO", "BI_CHAN"])))
       .orderBy(desc(checkIn.thoiGian))
       .limit(1);
     if (gan) return xemKetQua(tx, gan.id, true);

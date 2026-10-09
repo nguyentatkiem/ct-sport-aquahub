@@ -156,10 +156,14 @@ export default function GuestApp(p: Props) {
         {step !== "ket_qua" && (p.lop || p.coSo.diaChi) && (
           <div className="mb-4 rounded-2xl bg-white/80 px-4 py-3 text-sm ring-1 ring-line backdrop-blur">
             {p.lop ? (
-              <div className="flex items-center gap-2 font-semibold text-ink">
-                <GraduationCap className="size-4 text-brand" />
-                {t.class}: {p.lop.ten}
-                {p.lop.lich ? <span className="font-normal text-ink-2">· {p.lop.lich}</span> : null}
+              <div className="flex items-start gap-2 text-ink">
+                <GraduationCap className="mt-0.5 size-4 shrink-0 text-brand" />
+                <div>
+                  <div className="font-semibold">
+                    {t.class}: {p.lop.ten}
+                  </div>
+                  {(p.lop.lich || p.lop.giaoVien) && <div className="text-ink-2">{[p.lop.lich, p.lop.giaoVien].filter(Boolean).join(" · ")}</div>}
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2 text-ink-2">

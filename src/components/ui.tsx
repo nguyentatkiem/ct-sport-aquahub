@@ -59,7 +59,7 @@ export function LinkButton({
 
 export function Card({ className, children, ...p }: ComponentProps<"div">) {
   return (
-    <div {...p} className={clsx("rounded-[var(--radius)] bg-surface shadow-[0_1px_2px_rgba(15,42,95,.05),0_4px_16px_rgba(15,42,95,.04)] ring-1 ring-line/70", className)}>
+    <div {...p} className={clsx("min-w-0 rounded-[var(--radius)] bg-surface shadow-[0_1px_2px_rgba(15,42,95,.05),0_4px_16px_rgba(15,42,95,.04)] ring-1 ring-line/70", className)}>
       {children}
     </div>
   );

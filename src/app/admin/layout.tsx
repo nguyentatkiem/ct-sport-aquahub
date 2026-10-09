@@ -63,7 +63,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand">{tenCoSoGan}</span>
           )}
         </header>
-        <main className="mx-auto max-w-[1400px] px-4 py-5 pb-28 lg:px-6 lg:pb-10">{children}</main>
+        <main className="mx-auto max-w-[1400px] overflow-x-clip px-4 py-5 pb-28 lg:px-6 lg:pb-10">{children}</main>
       </div>
       <BottomNav items={items.filter((i) => !["/admin/checkin", "/admin/khach", "/admin/sap-het"].includes(i.href))} logout={logout} />
     </div>

@@ -175,6 +175,7 @@ async function demo() {
       const soLan = sp.id === ve10.id ? 6 + (n % 5) : 8 + (n % 9);
       for (let d = batDau - 1, lan = 0; d >= 0 && lan < soLan; d -= 1 + (n % 3), lan++) {
         const gio = [6, 7, 16, 17, 18, 19][(n + lan) % 6];
+        if (ngayTruoc(d, gio).getTime() > Date.now()) continue;
         await thucHienCheckIn({ khachHangId: k.id, coSoId: c.id, lopHocId: coKhoa ? lop.id : null, kenh: lan % 4 === 0 ? "LE_TAN" : "KHACH_TU_QUET", nguoiThaoTac: lan % 4 === 0 ? pLe : null, now: ngayTruoc(d, gio) });
       }
     }
