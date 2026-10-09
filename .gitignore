@@ -43,3 +43,9 @@ next-env.d.ts
 !.env.example
 
 .seed-credentials.txt
+
+# Tệp do tích hợp Neon/Vercel tạo
+.agents/
+.claude/
+skills-lock.json
+.seed-credentials*.txt

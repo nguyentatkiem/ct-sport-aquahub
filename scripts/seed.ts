@@ -15,6 +15,7 @@ import { tokenNgauNhien } from "../src/lib/text";
 import type { NguoiDungPhien } from "../src/server/auth";
 
 const DEMO = process.argv.includes("--demo");
+const FILE_TK = process.env.SEED_CRED_FILE || ".seed-credentials.txt";
 
 function matKhauNgauNhien() {
   return tokenNgauNhien(14);
@@ -49,8 +50,8 @@ async function nen() {
     luatChan: "HET_LUOT_HOAC_HET_HAN",
   });
   if (!process.env.SEED_OWNER_PASSWORD) {
-    writeFileSync(".seed-credentials.txt", `Tài khoản Chủ trung tâm\nĐăng nhập: ${email}\nMật khẩu: ${mk}\nĐổi mật khẩu ngay sau lần đăng nhập đầu.\n`);
-    console.log("Đã ghi tài khoản Chủ vào .seed-credentials.txt (không commit file này).");
+    writeFileSync(FILE_TK, `Tài khoản Chủ trung tâm\nĐăng nhập: ${email}\nMật khẩu: ${mk}\nĐổi mật khẩu ngay sau lần đăng nhập đầu.\n`);
+    console.log(`Đã ghi tài khoản Chủ vào ${FILE_TK} (không commit file này).`);
   }
   return true;
 }
@@ -80,7 +81,7 @@ async function demo() {
     )
     .returning();
   writeFileSync(
-    ".seed-credentials.txt",
+    FILE_TK,
     `\nTài khoản demo nhân viên (mật khẩu chung): ${demoPass}\n` + staff.map((u) => `- ${u.email} (${u.vaiTro})`).join("\n") + "\n",
     { flag: "a" },
   );

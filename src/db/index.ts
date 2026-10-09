@@ -15,7 +15,7 @@ export function getPool(): Pool {
     g.__ctsPool = new Pool({
       connectionString: url,
       max: Number(process.env.DB_POOL_MAX ?? 5),
-      ssl: /sslmode=require|neon\.tech/.test(url) ? { rejectUnauthorized: false } : undefined,
+      
     });
   }
   return g.__ctsPool;
