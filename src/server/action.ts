@@ -1,6 +1,6 @@
 import "server-only";
 import { LoiQuyen } from "./auth";
-import { LoiNghiepVu } from "./sales";
+import { LoiNghiepVu } from "./errors";
 
 export type KetQuaAction<T = unknown> = { ok: boolean; loi?: string; data?: T; at?: number };
 
@@ -14,7 +14,7 @@ export async function chay<T>(fn: () => Promise<T>): Promise<KetQuaAction<T>> {
     const msg = (e as Error)?.message ?? "";
     if (msg === "NEXT_REDIRECT" || (e as { digest?: string })?.digest?.startsWith?.("NEXT_REDIRECT")) throw e;
     console.error(e);
-    return { ok: false, loi: msg && msg.length < 160 ? msg : "Có lỗi xảy ra, vui lòng thử lại", at: Date.now() };
+    return { ok: false, loi: "Có lỗi hệ thống, vui lòng thử lại. Nếu lặp lại, báo quản trị.", at: Date.now() };
   }
 }
 

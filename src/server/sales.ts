@@ -9,7 +9,8 @@ import { sinhMaDon, sinhMaPhieu, sinhMaThe } from "./codes";
 import { ghiNhatKy } from "./audit";
 import type { NguoiDungPhien } from "./auth";
 
-export class LoiNghiepVu extends Error {}
+import { LoiNghiepVu } from "./errors";
+export { LoiNghiepVu };
 
 export type ThongTinThu = {
   soTien: number; // số tiền thu lần này (0 = chưa thu)

@@ -16,6 +16,7 @@ import {
   khoiPhucKhach,
   capLaiQr,
   gopHoSo,
+  anDanhHoaKhach,
   type DuLieuKhach,
 } from "@/server/customers";
 import { banTheVe, ghiDanhKhoaHoc, ghiNhanThu, huyPhieu, suaGiaThucThu, LoiNghiepVu } from "@/server/sales";
@@ -262,5 +263,13 @@ export async function ghiLienHeAction(theVeId: number, ketQua: string, ghiChu: s
     await db.insert(lienHeCanhBao).values({ theVeId, khachHangId: k.id, nguoiGoiId: u.id, ketQua, ghiChu: ghiChu.trim() || null });
     await ghiNhatKy(db, u, { module: "Chăm sóc", hanhDong: "DA_GOI", doiTuong: k.maKh, giaTriMoi: { ketQua }, lyDo: ghiChu, coSoId: k.coSoId });
     revalidatePath("/admin/sap-het");
+  });
+}
+
+export async function anDanhHoaAction(id: number, lyDo: string) {
+  return chay(async () => {
+    const u = await canDangNhap();
+    await anDanhHoaKhach(id, lyDo, u);
+    lam(id);
   });
 }

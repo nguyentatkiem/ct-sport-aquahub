@@ -9,6 +9,7 @@ import { docCaiDat } from "./settings";
 import { ghiNhatKy } from "./audit";
 import type { NguoiDungPhien } from "./auth";
 import { co } from "@/lib/permissions";
+import { LoiNghiepVu } from "./errors";
 
 export type Kenh = "KHACH_TU_QUET" | "LE_TAN" | "KIOSK";
 
@@ -178,9 +179,9 @@ export async function thucHienCheckIn(opts: {
   return db.transaction(async (tx) => {
     // Khoá theo khách: các lượt quét đồng thời của cùng khách chạy tuần tự
     const [k] = await tx.select().from(khachHang).where(eq(khachHang.id, opts.khachHangId)).for("update");
-    if (!k) throw new Error("Không tìm thấy khách");
+    if (!k) throw new LoiNghiepVu("Không tìm thấy khách");
     const [cs] = await tx.select().from(coSo).where(eq(coSo.id, opts.coSoId));
-    if (!cs) throw new Error("Không tìm thấy cơ sở");
+    if (!cs) throw new LoiNghiepVu("Không tìm thấy cơ sở");
 
     // BR-05: quét lại trong 5 phút trả kết quả lần trước
     const [gan] = await tx
@@ -279,15 +280,15 @@ export async function thucHienCheckIn(opts: {
 
 /** BR-11: Quản lý/Chủ cho vào 1 lần khi bị chặn, bắt buộc lý do. */
 export async function vuotChan(opts: { checkInId: number; lyDo: string; user: NguoiDungPhien; now?: Date }): Promise<KetQuaView> {
-  if (!co(opts.user.vaiTro, "VUOT_CHAN")) throw new Error("Lễ tân không có quyền vượt chặn");
+  if (!co(opts.user.vaiTro, "VUOT_CHAN")) throw new LoiNghiepVu("Lễ tân không có quyền vượt chặn");
   const lyDo = opts.lyDo.trim();
-  if (lyDo.length < 3) throw new Error("Bắt buộc ghi lý do vượt chặn");
+  if (lyDo.length < 3) throw new LoiNghiepVu("Bắt buộc ghi lý do vượt chặn");
   const now = opts.now ?? new Date();
   return db.transaction(async (tx) => {
     const [goc] = await tx.select().from(checkIn).where(eq(checkIn.id, opts.checkInId));
-    if (!goc) throw new Error("Không tìm thấy lượt check-in");
-    if (goc.ketQua !== "BI_CHAN") throw new Error("Chỉ vượt chặn lượt đang bị chặn");
-    if (opts.user.vaiTro !== "CHU" && opts.user.coSoId !== goc.coSoId) throw new Error("Lượt check-in thuộc cơ sở khác");
+    if (!goc) throw new LoiNghiepVu("Không tìm thấy lượt check-in");
+    if (goc.ketQua !== "BI_CHAN") throw new LoiNghiepVu("Chỉ vượt chặn lượt đang bị chặn");
+    if (opts.user.vaiTro !== "CHU" && opts.user.coSoId !== goc.coSoId) throw new LoiNghiepVu("Lượt check-in thuộc cơ sở khác");
     await tx.select().from(khachHang).where(eq(khachHang.id, goc.khachHangId)).for("update");
     const [daVuot] = await tx.select({ id: checkIn.id }).from(checkIn).where(eq(checkIn.vuotChanTuId, goc.id));
     if (daVuot) return xemKetQua(tx, daVuot.id, true);

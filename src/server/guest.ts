@@ -1,7 +1,7 @@
 // Nghiệp vụ trang khách (không đăng nhập): giải mã QR, tra cứu SĐT/mã khách có giới hạn, token chọn khách.
-import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/db";
-import { coSo, giaoVien, gioiHanTraCuu, khachHang, lopHoc, maQr, nguoiLienHe } from "@/db/schema";
+import { coSo, giaoVien, khachHang, lopHoc, maQr, nguoiLienHe } from "@/db/schema";
 import { chuanSdt, cheTen } from "@/lib/text";
 import { kyToken, docToken } from "./jwt";
 
@@ -23,16 +23,7 @@ export async function giaiMaQr(token: string) {
   };
 }
 
-/** NFR-06: tối đa `max` lần/phút cho mỗi khoá (thiết bị, IP). */
-export async function vuotGioiHan(khoa: string, max = 10): Promise<boolean> {
-  const phut = Math.floor(Date.now() / 60000);
-  const r = await db.execute(sql`
-    insert into gioi_han_tra_cuu (khoa, phut, so_lan) values (${khoa}, ${phut}, 1)
-    on conflict (khoa, phut) do update set so_lan = gioi_han_tra_cuu.so_lan + 1
-    returning so_lan`);
-  if (Math.random() < 0.02) await db.delete(gioiHanTraCuu).where(sql`${gioiHanTraCuu.phut} < ${phut - 60}`);
-  return Number((r.rows[0] as { so_lan: number }).so_lan) > max;
-}
+export { vuotGioiHan } from "./rate-limit";
 
 export type UngVien = { tok: string; tenChe: string; namSinh: string };
 

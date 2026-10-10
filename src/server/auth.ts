@@ -10,6 +10,9 @@ import { nguoiDung } from "@/db/schema";
 import { co, type Quyen, type VaiTro } from "@/lib/permissions";
 import { chuanSdt } from "@/lib/text";
 import { ghiNhatKy } from "./audit";
+import { vuotGioiHan } from "./rate-limit";
+
+const HASH_GIA = "$2b$10$6WnGm0dwsQ1FfGPbkY/OmOIxsiwFh2OlUT7MSL8gcm21.7CaYGciW";
 
 const COOKIE = "cts_session";
 const COOKIE_COSO = "cts_coso";
@@ -37,14 +40,19 @@ export async function thongTinYeuCau() {
 
 /** Đăng nhập bằng SĐT hoặc email (FR-HT-01). Sai 5 lần khoá 15 phút. */
 export async function dangNhap(dinhDanh: string, matKhau: string): Promise<{ ok: true } | { ok: false; loi: string }> {
-  const id = dinhDanh.trim().toLowerCase();
+  const info0 = await thongTinYeuCau();
+  if (await vuotGioiHan("login:" + (info0.ip ?? "?"), 20)) return { ok: false, loi: "Thử đăng nhập quá nhiều lần. Đợi 1 phút rồi thử lại." };
+  const id = dinhDanh.trim().toLowerCase().slice(0, 120);
   const sdt = chuanSdt(id);
   const [u] = await db
     .select()
     .from(nguoiDung)
     .where(or(eq(nguoiDung.email, id), sdt.length >= 9 ? eq(nguoiDung.sdt, sdt) : eq(nguoiDung.email, id)));
   const loiChung = "SĐT/email hoặc mật khẩu không đúng";
-  if (!u) return { ok: false, loi: loiChung };
+  if (!u) {
+    await soMatKhau(matKhau, HASH_GIA); // cân bằng thời gian phản hồi, tránh dò tài khoản
+    return { ok: false, loi: loiChung };
+  }
   if (u.trangThai !== "HOAT_DONG") return { ok: false, loi: "Tài khoản đã bị khoá. Liên hệ Chủ trung tâm." };
   if (u.khoaDen && u.khoaDen > new Date()) {
     const phut = Math.ceil((u.khoaDen.getTime() - Date.now()) / 60000);

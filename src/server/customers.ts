@@ -215,3 +215,35 @@ export async function gopHoSo(giuId: number, gopId: number, user: NguoiDungPhien
     await ghiNhatKy(tx, user, { module: "Khách hàng", hanhDong: "GOP_HO_SO", doiTuong: `${b.maKh} → ${a.maKh}`, coSoId: a.coSoId });
   });
 }
+
+/**
+ * NFR-08: xoá dữ liệu cá nhân theo yêu cầu. Ẩn danh hoá hồ sơ (tên, ngày sinh, SĐT, người liên hệ, ghi chú, sức khoẻ, QR)
+ * nhưng giữ thẻ, lượt, đơn, phiếu thu để sổ sách và báo cáo không lệch. Chỉ Chủ trung tâm.
+ */
+export async function anDanhHoaKhach(id: number, lyDo: string, user: NguoiDungPhien) {
+  if (!co(user.vaiTro, "XOA_KHACH")) throw new LoiNghiepVu("Chỉ Chủ trung tâm được xoá dữ liệu cá nhân");
+  if (!lyDo.trim()) throw new LoiNghiepVu("Ghi lý do (VD: khách yêu cầu xoá dữ liệu ngày …)");
+  return db.transaction(async (tx) => {
+    const k = await layKhachKhoa(tx, id, user);
+    await tx
+      .update(khachHang)
+      .set({
+        hoTen: "Khách đã xoá dữ liệu",
+        ngaySinh: "1900-01-01",
+        sdt: null,
+        nguoiLienHeId: null,
+        ghiChu: null,
+        ghiChuSucKhoe: null,
+        dongYDuLieuLuc: null,
+        qrToken: tokenNgauNhien(),
+        timKiem: chuoiTimKiem(k.maKh),
+        trangThai: "NGUNG",
+      })
+      .where(eq(khachHang.id, id));
+    if (k.nguoiLienHeId) {
+      const [conDung] = await tx.select({ id: khachHang.id }).from(khachHang).where(eq(khachHang.nguoiLienHeId, k.nguoiLienHeId)).limit(1);
+      if (!conDung) await tx.delete(nguoiLienHe).where(eq(nguoiLienHe.id, k.nguoiLienHeId));
+    }
+    await ghiNhatKy(tx, user, { module: "Dữ liệu cá nhân", hanhDong: "AN_DANH_HOA", doiTuong: k.maKh, lyDo, coSoId: k.coSoId });
+  });
+}

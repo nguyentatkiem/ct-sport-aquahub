@@ -1,4 +1,5 @@
 // Mô hình dữ liệu theo mục 4 của đặc tả. Tên bảng/cột giữ tiếng Việt không dấu để đối chiếu với tài liệu.
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -172,7 +173,11 @@ export const donHang = pgTable(
     nguoiTaoId: integer("nguoi_tao_id").references(() => nguoiDung.id),
     createdAt: ts("created_at").notNull().defaultNow(),
   },
-  (t) => [index("dh_co_so_ngay_idx").on(t.coSoId, t.ngayBan), index("dh_khach_idx").on(t.khachHangId)],
+  (t) => [
+    index("dh_co_so_ngay_idx").on(t.coSoId, t.ngayBan),
+    index("dh_khach_idx").on(t.khachHangId),
+    index("dh_con_no_idx").on(t.conNo).where(sql`${t.conNo} > 0`),
+  ],
 );
 
 export const theVe = pgTable(
@@ -273,6 +278,8 @@ export const checkIn = pgTable(
     index("ci_co_so_tg_idx").on(t.coSoId, t.thoiGian),
     index("ci_khach_tg_idx").on(t.khachHangId, t.thoiGian),
     index("ci_ngay_idx").on(t.ngayVn),
+    index("ci_the_ngay_idx").on(t.theVeId, t.ngayVn),
+    index("ci_vuot_idx").on(t.vuotChanTuId).where(sql`${t.vuotChanTuId} is not null`),
   ],
 );
 
@@ -296,7 +303,7 @@ export const phieuThu = pgTable(
     nguoiHuyId: integer("nguoi_huy_id"),
     huyLuc: ts("huy_luc"),
   },
-  (t) => [index("pt_co_so_ngay_idx").on(t.coSoId, t.ngayVn), index("pt_don_idx").on(t.donHangId)],
+  (t) => [index("pt_co_so_ngay_idx").on(t.coSoId, t.ngayVn), index("pt_don_idx").on(t.donHangId), index("pt_khach_idx").on(t.khachHangId)],
 );
 
 export const dieuChinh = pgTable("dieu_chinh", {
@@ -313,15 +320,19 @@ export const dieuChinh = pgTable("dieu_chinh", {
   thoiGian: ts("thoi_gian").notNull().defaultNow(),
 });
 
-export const lienHeCanhBao = pgTable("lien_he_canh_bao", {
+export const lienHeCanhBao = pgTable(
+  "lien_he_canh_bao",
+  {
   id: serial("id").primaryKey(),
   theVeId: integer("the_ve_id").notNull().references(() => theVe.id),
   khachHangId: integer("khach_hang_id").notNull().references(() => khachHang.id),
   nguoiGoiId: integer("nguoi_goi_id").references(() => nguoiDung.id),
   ketQua: text("ket_qua").notNull(), // DA_GOI | KHONG_NGHE | HEN_GOI_LAI | SE_GIA_HAN | KHONG_GIA_HAN
-  ghiChu: text("ghi_chu"),
-  thoiGian: ts("thoi_gian").notNull().defaultNow(),
-});
+    ghiChu: text("ghi_chu"),
+    thoiGian: ts("thoi_gian").notNull().defaultNow(),
+  },
+  (t) => [index("lhcb_the_tg_idx").on(t.theVeId, t.thoiGian)],
+);
 
 export const nhatKy = pgTable(
   "nhat_ky",

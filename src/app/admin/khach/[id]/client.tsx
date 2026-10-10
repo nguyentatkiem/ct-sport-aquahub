@@ -16,6 +16,7 @@ import {
   khoiPhucAction,
   capLaiQrAction,
   gopAction,
+  anDanhHoaAction,
   thuTienAction,
   huyPhieuAction,
   suaGiaAction,
@@ -139,7 +140,7 @@ export function DuyetTuChoi({ id }: { id: number }) {
 }
 
 export function QuanLyHoSo({ id, trangThai, xoa, gop }: { id: number; trangThai: string; xoa: boolean; gop: boolean }) {
-  const [mo, setMo] = useState<null | "menu" | "qr" | "xoa" | "gop">(null);
+  const [mo, setMo] = useState<null | "menu" | "qr" | "xoa" | "gop" | "andanh">(null);
   const [txt, setTxt] = useState("");
   const { pending, loi, run } = useAct();
   const dong = () => {
@@ -165,6 +166,14 @@ export function QuanLyHoSo({ id, trangThai, xoa, gop }: { id: number; trangThai:
             {xoa && trangThai !== "NGUNG" && (
               <Button variant="danger" onClick={() => setMo("xoa")}>
                 Xoá hồ sơ (chuyển Ngừng)
+              </Button>
+            )}
+            <a href={`/api/ca-nhan/${id}`} className="flex h-11 items-center justify-center rounded-xl font-semibold text-ink ring-1 ring-line hover:bg-surface-2">
+              Xuất dữ liệu cá nhân (theo yêu cầu khách)
+            </a>
+            {xoa && (
+              <Button variant="danger" onClick={() => setMo("andanh")}>
+                Xoá dữ liệu cá nhân (ẩn danh hoá)
               </Button>
             )}
             {xoa && trangThai === "NGUNG" && (
@@ -195,6 +204,21 @@ export function QuanLyHoSo({ id, trangThai, xoa, gop }: { id: number; trangThai:
           <div className="mt-3 flex justify-end">
             <Button variant="danger" disabled={pending || !txt.trim()} onClick={() => run(() => xoaKhachAction(id, txt), dong)}>
               Xoá hồ sơ
+            </Button>
+          </div>
+        </Modal>
+      )}
+      {mo === "andanh" && (
+        <Modal title="Xoá dữ liệu cá nhân" onClose={dong}>
+          <p className="mb-2 text-sm text-ink-2">
+            Xoá vĩnh viễn họ tên, ngày sinh, SĐT, người liên hệ, ghi chú, sức khoẻ và QR của khách (NFR-08). Thẻ, lượt, đơn, phiếu thu được giữ
+            nhưng không còn gắn với thông tin cá nhân. <b>Không hoàn tác được.</b> Nên xuất dữ liệu trước nếu khách cần bản sao.
+          </p>
+          <Input value={txt} onChange={(e) => setTxt(e.target.value)} placeholder="Lý do / ngày khách yêu cầu" />
+          {loi && <Alert tone="bad" className="mt-2">{loi}</Alert>}
+          <div className="mt-3 flex justify-end">
+            <Button variant="danger" disabled={pending || !txt.trim()} onClick={() => run(() => anDanhHoaAction(id, txt), dong)}>
+              Xoá dữ liệu cá nhân
             </Button>
           </div>
         </Modal>
